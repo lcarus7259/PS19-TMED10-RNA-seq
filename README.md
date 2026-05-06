@@ -1,21 +1,114 @@
-### Description
+# Differential expression analysis of RNA-seq data using DESeq2
 
-DESeq2<sup>[1]</sup> is an open source [R package](http://www.bioconductor.org/packages/release/bioc/html/DESeq2.html) for differential analysis of count data, using shrinkage estimation for dispersions and fold changes to improve stability and interpretability of estimates. This enables a more quantitative analysis focused on the strength rather than the mere presence of differential expression.
+This repository contains the complete R code to reproduce the differential expression analysis, PCA visualization, heatmap, and KEGG enrichment plots described in the manuscript. The analysis was performed using **DESeq2** (Love et al., 2014) on RNA-seq count data from four experimental groups.
 
-DESeq2 offers a comprehensive and general solution for gene-level analysis of RNA-seq data. Shrinkage estimators substantially improve the stability and reproducibility of analysis results compared to maximum-likelihood-based solutions. Empirical Bayes priors provide automatic control of the amount of shrinkage based on the amount of information for the estimated quantity available in the data. This allows DESeq2 to offer consistent performance over a large range of data types and makes it applicable for small studies with few replicates as well as for large observational studies.
+## Requirements
 
-### Installation  
-
-First, we need to install `BiocManager`:  
-
-    if (!require("BiocManager", quietly = TRUE))
+- **R** version 4.2 or higher
+- Required R packages (install if missing):
+  ```r
+  install.packages(c("ggplot2", "pheatmap", "ggrepel", "dplyr", "stringr", "writexl"))
+  if (!require("BiocManager", quietly = TRUE))
     install.packages("BiocManager")
-   
-Then we just call  
+  BiocManager::install(c("DESeq2", "ggview"))
+  ```
 
-    BiocManager::install("DESeq2")
-    library(DESeq2)
+## Input data
 
-### References
+Place the following file in the same directory as the R script:
 
-[1] Love MI, Huber W, Anders S. Moderated estimation of fold change and dispersion for RNA-seq data with DESeq2. Genome Biology, 15, 550 (2014). DOI:10.1186/s13059-014-0550-8
+- **`T10.csv`**  
+  A raw count matrix (genes as rows, samples as columns).  
+  - First column must be named `"Gene"` and contains gene identifiers (e.g., Ensembl IDs or gene symbols).  
+  - All other columns contain integer read counts for each sample.  
+
+The sample condition (grouping) is defined inside the script as:
+```r
+condition <- factor(c(rep("WT",6), rep("WT_T10_kd",6), rep("PS19",5), rep("PS19_T10_kd",4)))
+```
+Make sure the order of columns in `T10.csv` matches this condition vector (i.e., first 6 samples WT, next 6 WT_T10_kd, next 5 PS19, last 4 PS19_T10_kd).
+
+## Running the analysis
+
+Open R or RStudio and run the entire script:
+   ```r
+   source("PS19_T10_RNA_seq.R")
+   ```
+
+The script performs the following steps automatically:
+
+- Loads and filters low‑expression genes (row mean > 10)
+- Runs DESeq2 differential expression analysis (comparison: `PS19_T10_kd` vs `PS19`)
+- Orders results by adjusted p‑value and log2 fold change
+- Generates a PCA plot (`PCA-T10.pdf`)
+- Identifies differentially expressed genes (|log2FC| ≥ 0.4 and padj < 0.05)
+- Produces a heatmap using the top 50 up‑regulated and top 70 down‑regulated genes (`Heatmap-T10.pdf`)
+- Exports up‑regulated genes to `DEG_UP.xlsx` (used for KEGG enrichment)
+
+### KEGG enrichment plotting (additional step)
+
+The script reads a pre‑computed KEGG enrichment file named **`KEGG_UP.csv`** that you must generate separately using **DAVID**.  
+
+Expected columns: `Ontology`, `Description`, `Ratio`, `Count`, `log10padj`.  
+
+To obtain this file:
+
+- Take the gene list from `DEG_UP.xlsx` (gene column)
+- Submit it to DAVID (https://davidbioinformatics.nih.gov/) for KEGG pathway analysis
+- Download the result table and save as `KEGG_UP.csv` in the same folder
+- Ensure the column `Ontology` contains `"KEGG_PATHWAY"` for the rows you wish to plot
+- `Ratio` was calculated as **Count / total number of genes**
+- The column `log10padj` actually represents **`-log10(padj)`** (the negative base‑10 logarithm of the adjusted p‑value), where larger values indicate more significant enrichment
+
+After placing `KEGG_UP.csv`, re‑run the script:
+```r
+source("PS19_T10_RNA_seq.R")
+```
+
+The script then produces `KEGG-T10.pdf` (bubble plot of top 11 KEGG pathways).
+
+## Output files
+
+| File | Description |
+|------|-------------|
+| `PCA-T10.pdf` | Principal component analysis (PC1 vs PC2) colored by condition. |
+| `Heatmap-T10.pdf` | Heatmap of top differentially expressed genes (row‑scaled). |
+| `KEGG-T10.pdf` | Bubble plot for KEGG enrichment (GeneRatio vs Count, coloured by significance). |
+| `DEG_UP.xlsx` | Excel file with up‑regulated genes (log2FC ≥ 0.4, padj < 0.05). |
+
+## Reproducibility
+
+To ensure identical results, run the following to see your R environment:
+
+```r
+sessionInfo()
+```
+
+Example output from the original analysis:
+```
+R version 4.3.0 (2023-04-21 ucrt)
+Platform: x86_64-w64-mingw32/x64 (64-bit)
+Running under: Windows 11 x64 (build 26200)
+
+attached base packages:
+[1] stats     graphics  grDevices utils     datasets  methods   base    
+
+other attached packages:
+ [1] writexl_1.5.4               ggview_0.2.2                stringr_1.5.0              
+ [4] dplyr_1.1.2                 ggrepel_0.9.3               pheatmap_1.0.12            
+ [7] ggplot2_3.4.3               DESeq2_1.40.2               SummarizedExperiment_1.30.2
+[10] Biobase_2.60.0              MatrixGenerics_1.12.3       matrixStats_1.0.0          
+[13] GenomicRanges_1.52.0        GenomeInfoDb_1.36.1         IRanges_2.34.1             
+[16] S4Vectors_0.38.1            BiocGenerics_0.46.0
+```
+
+**Note:** The exact output may vary slightly with newer R/package versions, but the overall biological conclusions should remain unchanged.
+
+## License
+
+This code is provided for reproducibility purposes. Please contact the authors for reuse permissions.
+
+## Citation
+
+If you use this analysis in your work, please cite:
+- Love, M.I., Huber, W., Anders, S. (2014) Moderated estimation of fold change and dispersion for RNA-seq data with DESeq2. *Genome Biology*, 15(12):550.
