@@ -4,7 +4,7 @@ This repository contains the complete R code to reproduce the differential expre
 
 ## Requirements
 
-- **R** version 4.2 or higher
+- **R** version 4.3 or higher
 - Required R packages (install if missing):
   ```r
   install.packages(c("ggplot2", "pheatmap", "ggrepel", "dplyr", "stringr", "writexl"))
