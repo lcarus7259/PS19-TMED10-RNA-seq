@@ -54,7 +54,7 @@ Expected columns: `Ontology`, `Description`, `Ratio`, `Count`, `log10padj`.
 To obtain this file:
 
 - Take the gene list from `DEG_UP.xlsx` (gene column)
-- Submit it to DAVID (https://davidbioinformatics.nih.gov/) for KEGG pathway analysis
+- Submit it to DAVID (https://davidbioinformatics.nih.gov/) for KEGG pathway analysis, **all genes detected in experiment** (i.e., the gene list from `T10.csv`) is used as the background
 - Download the result table and save as `KEGG_UP.csv` in the same folder
 - Ensure the column `Ontology` contains `"KEGG_PATHWAY"` for the rows you wish to plot
 - `Ratio` was calculated as **Count / total number of genes**
