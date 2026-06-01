@@ -56,8 +56,8 @@ To obtain this file:
 - Take the gene list from `DEG_UP.xlsx` (gene column)
 - Submit it to DAVID (https://davidbioinformatics.nih.gov/) for KEGG pathway analysis, **all genes detected in experiment** (i.e., the gene list from `T10.csv`) is used as the background
 - Download the result table and save as `KEGG_UP.csv` in the same folder
-- Ensure the column `Ontology` contains `"KEGG_PATHWAY"` for the rows you wish to plot
-- `Ratio` was calculated as **Count / total number of genes**
+- Ensure the column `Ontology` contains "KEGG_PATHWAY" for the rows you wish to plot
+- `Ratio` was calculated as `Count` divided by the total number of genes
 - The column `log10padj` actually represents **`-log10(padj)`** (the negative base‑10 logarithm of the adjusted p‑value), where larger values indicate more significant enrichment
 
 After placing `KEGG_UP.csv`, re‑run the script:
@@ -106,7 +106,10 @@ other attached packages:
 
 ## License
 
-This code is provided for reproducibility purposes. Please contact the authors for reuse permissions.
+Copyright © 2026 Authors.
+
+This repository is provided solely for academic reproducibility.
+No commercial use, redistribution, or modification is permitted without prior permission from the authors.
 
 ## Citation
 
